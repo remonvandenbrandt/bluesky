@@ -805,6 +805,14 @@ class Route:
         self.__init__()
         return True
 
+    def _del_wpt_data(self, idx):
+        del self.wpname[idx]
+        del self.wplat[idx]
+        del self.wplon[idx]
+        del self.wpalt[idx]
+        del self.wpspd[idx]
+        del self.wptype[idx]
+
     def delwpt(self, delwpname):
         """Delete waypoint"""
 
@@ -825,12 +833,14 @@ class Route:
             return False, "Waypoint " + delwpname + " not found"
 
         self.nwp -= 1
-        del self.wpname[idx]
-        del self.wplat[idx]
-        del self.wplon[idx]
-        del self.wpalt[idx]
-        del self.wpspd[idx]
-        del self.wptype[idx]
+        # del self.wpname[idx]
+        # del self.wplat[idx]
+        # del self.wplon[idx]
+        # del self.wpalt[idx]
+        # del self.wpspd[idx]
+        # del self.wptype[idx]
+        self._del_wpt_data(idx)
+
         if self.iactwp > idx:
             self.iactwp = max(0, self.iactwp - 1)
 
