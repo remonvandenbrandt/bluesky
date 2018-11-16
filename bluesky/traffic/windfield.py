@@ -5,6 +5,7 @@ from numpy import array, sin, cos, arange, radians, ones, append, ndarray, \
 
 from bluesky.tools.aero import ft
 
+
 class Windfield():
     """ Windfield class:
         Methods:

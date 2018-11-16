@@ -466,6 +466,12 @@ def init(startup_scnfile):
             lambda idx, *args: bs.traf.ap.route[idx].listrte(idx, *args),
             "Show list of route in window per page of 5 waypoints"
         ],
+        "LOAD_WIND": [
+            "LOAD_WIND filename",
+            "string",
+            bs.traf.wind.load_file,
+            "Load NetCDF Weather file"
+        ],
         "LNAV": [
             "LNAV acid,[ON/OFF]",
             "acid,[onoff]",

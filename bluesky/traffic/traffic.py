@@ -16,7 +16,7 @@ from bluesky.tools.aero import fpm, kts, ft, g0, Rearth, nm, \
 
 from bluesky.tools.trafficarrays import TrafficArrays, RegisterElementParameters
 
-from .windsim import WindSim
+from .windiris import WindIris
 from .conditional import Condition
 from .trails import Trails
 from .adsbmodel import ADSB
@@ -73,7 +73,7 @@ class Traffic(TrafficArrays):
         self.ntraf = 0
 
         self.cond = Condition()  # Conditional commands list
-        self.wind = WindSim()
+        self.wind = WindIris()
         self.turbulence = Turbulence()
         self.translvl = 5000.*ft # [m] Default transition level
 
