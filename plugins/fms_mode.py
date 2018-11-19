@@ -354,6 +354,7 @@ class Afms:
         else:
             name = args[0]
             rta_time = args[1]
+
             if name in traf.ap.route[idx].wpname:
                 wpidx = traf.ap.route[idx].wpname.index(name)
                 traf.ap.route[idx].wprta[wpidx] = datetime.strptime(rta_time, '%H:%M:%S').time()

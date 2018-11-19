@@ -467,8 +467,8 @@ def init(startup_scnfile):
             "Show list of route in window per page of 5 waypoints"
         ],
         "LOAD_WIND": [
-            "LOAD_WIND filename",
-            "string",
+            "LOAD_WIND ensemble, filename",
+            "int, string",
             bs.traf.wind.load_file,
             "Load NetCDF Weather file"
         ],

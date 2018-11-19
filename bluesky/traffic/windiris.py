@@ -45,6 +45,8 @@ class WindIris:
         self.east = []
         self.__ens = []
 
+        self.__loaded = False
+
     def _get_mean(self, lat, lon, pressure, time):
         time = date2num(time, units='hours since 1900-01-01 00:00:0.0', calendar='gregorian')
         return self.__interpolate(self.north_mean, self.east_mean, lat, lon, pressure, time)
@@ -76,14 +78,19 @@ class WindIris:
             East component of the wind.
         """
 
-        # TODO: find a faster alternative to date2num
-        time = date2num(time, units='hours since 1900-01-01 00:00:0.0', calendar='gregorian')
+        if self.__loaded:
+            # TODO: find a faster alternative to date2num
+            time = date2num(time, units='hours since 1900-01-01 00:00:0.0', calendar='gregorian')
 
-        if ens:
-            self.__load_ensemble(ens)
-        return self.__interpolate(self.north, self. east, lat, lon, pressure, time)
+            if ens:
+                self.__load_ensemble(ens)
+            return self.__interpolate(self.north, self. east, lat, lon, pressure, time)
+        else:
+            return 0, 0
 
-    def load_file(self, filename):
+    def load_file(self, ensemble, filename):
+
+        # print(filename, args)
         self.cubes = iris.load(filename, ['northward_wind', 'eastward_wind'])
         self.cubes[0].coord('pressure_level').convert_units('pascal')
         self.cubes[1].coord('pressure_level').convert_units('pascal')
@@ -101,7 +108,9 @@ class WindIris:
             self.north = self.cubes[0].data
             self.east = self.cubes[1].data
         self.__ens = []
-        self.__load_ensemble(1)
+        self.__load_ensemble(ensemble)
+
+        self.__loaded = True
 
     # -----  mimic windsim class API -------------------
     def get(self, lat, lon, alt=0):
