@@ -1,3 +1,11 @@
+"""
+Implementation of the weather module in BlueSky with support for netCDF files.
+
+Author: Remon van den Brandt
+Date: 11-12-2018
+"""
+
+
 from netCDF4 import date2num, num2date
 from scipy import ndimage, interpolate
 import numpy as np
@@ -9,11 +17,6 @@ import bluesky as bs
 class WindIris:
     """
     Create interpolation and statistical routines that apply to the wind forecast.
-
-    Parameters
-    ----------
-    filename : str
-        Path to netCDF weather data file.
 
     Notes
     -----
@@ -67,8 +70,6 @@ class WindIris:
             timestamp.
         ens: int, optional
             Ensemble member.
-        ignore_date: bool
-            Ignore the date, instead only use time.
 
         Returns
         -------
@@ -89,9 +90,17 @@ class WindIris:
             return 0, 0
 
     def load_file(self, ensemble, filename):
+        """ Load netCDF file into memory.
 
-        # print(filename, args)
-        self.cubes = iris.load(filename, ['northward_wind', 'eastward_wind'])
+        Parameters
+        ----------
+        ensemble : int
+            The number of the ensemble to be loaded.
+        filename : str
+            The location of the netCDF file to be loaded.
+        """
+
+        self.cubes = iris.load(filename.lower(), ['northward_wind', 'eastward_wind'])
         self.cubes[0].coord('pressure_level').convert_units('pascal')
         self.cubes[1].coord('pressure_level').convert_units('pascal')
 
@@ -126,6 +135,24 @@ class WindIris:
         return True, txt
 
     def getdata(self, userlat, userlon, useralt=0.0):
+        """ Retrieve the north and south component of the windfield, interpolated at a given positions.
+
+        Parameters
+        ----------
+        userlat : float
+            Latitude [deg]
+        userlon : float
+            Longitude [deg]
+        userlat : float
+            Altitude [m]
+
+        Returns
+        -------
+        north: array_like
+             North component of the wind.
+        east: array_like
+            East component of the wind.
+         """
         p = vatmos(useralt)[0]
         time = bs.sim.utc
 
@@ -140,6 +167,7 @@ class WindIris:
         pass
 
     def add(self, *arg):
+        # not used
         pass
 
     def clear(self):
@@ -164,8 +192,8 @@ class WindIris:
         if list(self.ens):
             # if ens member is different from the one currently loaded
             if self.__ens is not ens:
-                self.north = self.cubes[0].extract(iris.Constraint(ensemble_member=ens)).data
-                self.east = self.cubes[1].extract(iris.Constraint(ensemble_member=ens)).data
+                self.north = self.cubes[0].extract(iris.Constraint(ensemble_member=ens)).data - self.north_mean
+                self.east = self.cubes[1].extract(iris.Constraint(ensemble_member=ens)).data - self.east_mean
             self.__ens = ens
 
     def __interpolate(self, cube_n, cube_e, lat, lon, pressure, time):
@@ -181,7 +209,7 @@ class WindIris:
 
         f = interpolate.interp1d(self.pressure, range(len(self.pressure)), bounds_error=True, assume_sorted=True)
         pres_i = f(pressure)
-        time_i = (time - self.cubes[0].coord('time').points[0]) / 6  # note: this assumes 6 hour intervals
+        time_i = (time - self.cubes[0].coord('time').points[0]) / len(self.cubes[0].coord('time').points)
 
         # TODO check for out of bounds
         coord = np.vstack((time_i, pres_i, lat_i, lon_i))

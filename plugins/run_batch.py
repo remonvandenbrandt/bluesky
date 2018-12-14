@@ -19,7 +19,6 @@ class Batch:
     def update(self):
         # it the batch is running, check if the ac has landed
         if self.running:
-            print(traf.perf.mass)
             if not sim.ffmode:
                 stack.stack('run')
                 stack.stack('FF')
@@ -27,7 +26,7 @@ class Batch:
             if not self.takeoff and traf.alt[0] > 10:
                 self.takeoff = True
 
-            if traf.alt[0] < 10 and self.takeoff:
+            if self.takeoff and not traf.swlnav[0]:
                 stack.stack('hold')
                 self.results_list.append([self.ic[self.current_scn-1], sim.utc.time(), traf.perf.mass])
                 self._next()
@@ -50,13 +49,12 @@ class Batch:
         stack.stack('load_wind {} {}'.format(self.current_ens, self.nc))
         self.running = True
         self._next()
-        # stack.stack('IC batch/{}'.format(self.ic[0]))
+        stack.stack('IC batch/{}'.format(self.ic[0]))
 
     def _next(self):
         self.ensembles = traf.wind.ens
         if self.current_scn > len(self.ic)-1:  # if end of scns?)
             if self.current_ens < len(self.ensembles):
-                # print(self.ensembles[0:3])
                 self.current_ens = self.current_ens + 1
                 print(self.current_ens)
                 stack.stack('load_wind {} {}'.format(self.current_ens, self.nc))
@@ -64,7 +62,7 @@ class Batch:
                 self._next()
             else:  # done, store data and go home
                 df = pd.DataFrame(columns=['id', 'time', 'fuel'], data=self.results_list)
-                pickle.dump(df, open('results.p', 'wb'))
+                pickle.dump(df, open('output/results.p', 'wb'))
         else:  # switch to the next scn file
             stack.stack('IC batch/{}'.format(self.ic[self.current_scn]))
             self.current_scn = self.current_scn + 1
